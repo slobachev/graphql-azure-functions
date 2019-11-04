@@ -17,17 +17,12 @@ namespace Function
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            var server = new Server();
+            string query = req.Query["query"];
+            //string query = "mutation test { addBook(input: { name: \"1984\", genre: \"Dystopia\"  }) { name } }";
 
-            string name = req.Query["name"];
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
-
-            return name != null
-                ? (ActionResult)new OkObjectResult($"Hello, {name}")
-                : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+            var json = await server.QueryAsync(query);
+            return new OkObjectResult(json);
         }
     }
 }
